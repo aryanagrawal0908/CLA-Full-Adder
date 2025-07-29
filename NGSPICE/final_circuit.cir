@@ -1,0 +1,91 @@
+Final_Circuit_Pre_layout_Simulations
+.include TSMC_180nm.txt
+.include sub_circuits.sub
+
+.param LAMBDA=0.09u
+.param SUPPLY=1.8
+.param width=1.8u
+
+.global vdd gnd
+
+VDD vdd gnd 'SUPPLY'
+Vclk clk gnd pulse(1.8 0 0 0 0 5n 10n)
+VC0 c0 gnd 0
+
+VA3 a3 gnd 0
+VA2 a2 gnd pulse(0 1.8 3n 0 0 20n 40n)
+VA1 a1 gnd pulse(0 1.8 3n 0 0 20n 40n)
+VA0 a0 gnd pulse(0 1.8 3n 0 0 20n 40n)
+
+VB3 b3 gnd 0
+VB2 b2 gnd pulse(0 1.8 3n 0 0 20n 40n)
+VB1 b1 gnd pulse(0 1.8 3n 0 0 20n 40n)
+VB0 b0 gnd pulse(0 1.8 3n 0 0 20n 40n)
+
+
+* dff all input
+Xdff0 a0mid a0 clk vdd gnd dff
+Xdff1 a1mid a1 clk vdd gnd dff
+Xdff2 a2mid a2 clk vdd gnd dff
+Xdff3 a3mid a3 clk vdd gnd dff
+
+Xdff4 b0mid b0 clk vdd gnd dff
+Xdff5 b1mid b1 clk vdd gnd dff
+Xdff6 b2mid b2 clk vdd gnd dff
+Xdff7 b3mid b3 clk vdd gnd dff
+
+* All Propagate and Generate
+Xp_g_ckt0 p0 g0 a0mid b0mid vdd gnd p_g_ckt
+Xp_g_ckt1 p1 g1 a1mid b1mid vdd gnd p_g_ckt
+Xp_g_ckt2 p2 g2 a2mid b2mid vdd gnd p_g_ckt
+Xp_g_ckt3 p3 g3 a3mid b3mid vdd gnd p_g_ckt
+
+* CLA block
+Xand1 w1 p0 c0 vdd gnd and2
+Xor1 c1 w1 g0 vdd gnd or2
+
+Xand21 w21 p1 g0 vdd gnd and2
+Xand22 w22 p1 p0 c0 vdd gnd and3
+Xor2 c2  g1 w21 w22 vdd gnd or3
+
+Xand31 w31 p2 g1 vdd gnd and2
+Xand32 w32 p2 p1 g0 vdd gnd and3
+Xand33 w33 p2 p1 p0 c0 vdd gnd and4
+Xor3 c3 g2 w31 w32 w33 vdd gnd or4
+
+Xand41 w41 p3 g2 vdd gnd and2
+Xand42 w42 p3 p2 g1 vdd gnd and3
+Xand43 w43 p3 p2 p1 g0 vdd gnd and4
+Xand44 w44 p3 p2 p1 p0 c0 vdd gnd and5
+Xor4 c4 g3 w41 w42 w43 w44 vdd gnd or5
+
+* Sum Block
+Xxor0 s0mid c0 p0 vdd gnd xor
+Xxor1 s1mid c1 p1 vdd gnd xor
+Xxor2 s2mid c2 p2 vdd gnd xor
+Xxor3 s3mid c3 p3 vdd gnd xor
+
+* dff all outputs
+Xdff8 s0 s0mid clk vdd gnd dff
+Xdff9 s1 s1mid clk vdd gnd dff
+Xdff10 s2 s2mid clk vdd gnd dff
+Xdff11 s3 s3mid clk vdd gnd dff
+
+Xdff12 cout c4 clk vdd gnd dff
+
+Xinv0 s0 s0not vdd gnd inv width_N=0.9u
+Xinv1 s1 s1not vdd gnd inv width_N=0.9u
+Xinv2 s2 s2not vdd gnd inv width_N=0.9u
+Xinv3 s3 s3not vdd gnd inv width_N=0.9u
+
+.tran 0.01n 20n
+
+.control
+set hcopypscolor = 1 
+set color1=black
+set color0=white 
+
+run
+set curplottitle=Snehil_Sanjog-2023102051-q7-final_circuit
+plot v(s0) v(s1)+2 v(s2)+4 v(s3)+6 v(cout)+8 v(clk)+10
+.endc

@@ -1,0 +1,120 @@
+dff_post_layout_Simulations
+.include TSMC_180nm.txt
+
+.param LAMBDA=0.09u
+.param SUPPLY=1.8
+.param width=1.8u
+
+.global vdd gnd
+
+VDD vdd gnd 'SUPPLY'
+
+Vclk clk gnd pulse (1.8 0 0 0 0 5n 10n)
+Vd d gnd pulse (0 1.8 3n 0 0 10n 20n)
+
+.option scale=0.09u
+
+M1000 b clk d3 Gnd CMOSN w=20 l=2
++  ad=100 pd=50 as=200 ps=100
+M1001 b q1 vdd vdd CMOSP w=40 l=2
++  ad=200 pd=90 as=1200 ps=540
+M1002 d1 d vdd vdd CMOSP w=40 l=2
++  ad=400 pd=180 as=0 ps=0
+M1003 q1 a gnd Gnd CMOSN w=20 l=2
++  ad=100 pd=50 as=600 ps=300
+M1004 d4 b gnd Gnd CMOSN w=20 l=2
++  ad=200 pd=100 as=0 ps=0
+M1005 qnot qmid gnd Gnd CMOSN w=20 l=2
++  ad=100 pd=50 as=0 ps=0
+M1006 q qnot vdd vdd CMOSP w=40 l=2
++  ad=200 pd=90 as=0 ps=0
+M1007 q1 clk d2 vdd CMOSP w=40 l=2
++  ad=200 pd=90 as=400 ps=180
+M1008 a d gnd Gnd CMOSN w=20 l=2
++  ad=100 pd=50 as=0 ps=0
+M1009 d3 q1 gnd Gnd CMOSN w=20 l=2
++  ad=0 pd=0 as=0 ps=0
+M1010 a clk d1 vdd CMOSP w=40 l=2
++  ad=200 pd=90 as=0 ps=0
+M1011 qnot qmid vdd vdd CMOSP w=40 l=2
++  ad=200 pd=90 as=0 ps=0
+M1012 qmid clk d4 Gnd CMOSN w=20 l=2
++  ad=100 pd=50 as=0 ps=0
+M1013 q qnot gnd Gnd CMOSN w=20 l=2
++  ad=100 pd=50 as=0 ps=0
+M1014 d2 a vdd vdd CMOSP w=40 l=2
++  ad=0 pd=0 as=0 ps=0
+M1015 qmid b vdd vdd CMOSP w=40 l=2
++  ad=200 pd=90 as=0 ps=0
+C0 d gnd 0.05fF
+C1 qmid d4 0.21fF
+C2 d clk 0.30fF
+C3 vdd clk 0.35fF
+C4 d d1 0.12fF
+C5 qmid b 0.07fF
+C6 d a 0.07fF
+C7 vdd d1 0.63fF
+C8 d4 gnd 0.21fF
+C9 vdd a 0.29fF
+C10 clk d4 0.04fF
+C11 q gnd 0.23fF
+C12 b gnd 0.05fF
+C13 b clk 0.18fF
+C14 q1 d3 0.12fF
+C15 q1 d2 0.45fF
+C16 vdd d 0.22fF
+C17 qmid qnot 0.07fF
+C18 qnot gnd 0.28fF
+C19 vdd q 0.51fF
+C20 vdd b 0.73fF
+C21 d3 gnd 0.21fF
+C22 clk d3 0.04fF
+C23 q1 gnd 0.26fF
+C24 b d4 0.12fF
+C25 d2 clk 0.04fF
+C26 q1 clk 0.18fF
+C27 a d2 0.12fF
+C28 vdd qnot 0.60fF
+C29 a q1 0.07fF
+C30 qmid gnd 0.05fF
+C31 qmid clk 0.07fF
+C32 qnot q 0.07fF
+C33 vdd d2 0.63fF
+C34 vdd q1 0.26fF
+C35 clk gnd 0.45fF
+C36 d1 clk 0.04fF
+C37 a gnd 0.26fF
+C38 b d3 0.21fF
+C39 a clk 0.40fF
+C40 q1 b 0.07fF
+C41 a d1 0.45fF
+C42 vdd qmid 0.62fF
+C43 gnd Gnd 0.74fF
+C44 d4 Gnd 0.15fF
+C45 d3 Gnd 0.16fF
+C46 clk Gnd 1.41fF
+C47 q Gnd 0.10fF
+C48 b Gnd 0.03fF
+C49 q1 Gnd 0.64fF
+C50 a Gnd 0.46fF
+C51 d Gnd 0.33fF
+C52 qnot Gnd 0.28fF
+C53 qmid Gnd 0.02fF
+C54 vdd Gnd 4.69fF
+
+.tran 0.01n 20n
+
+.measure tran tpcq_r trig v(clk) val='SUPPLY/2' rise=1 targ v(q) val='SUPPLY/2' rise=1
+.measure tran tpcq_f trig v(clk) val='SUPPLY/2' rise=2 targ v(q) val='SUPPLY/2' fall=1
+.measure tran tpcq param='(tpcq_r+tpcq_f)/2' goal=1
+
+.control
+set hcopypscolor = 1 
+set color0=white 
+set color1=black 
+
+run
+set curplottitle=Snehil_Sanjog-2023102051-q6-dff
+plot v(q) v(d)+2 v(clk)+4
+hardcopy dff_max.eps v(q) v(d)+2 v(clk)+4
+.endc

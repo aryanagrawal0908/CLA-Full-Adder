@@ -1,0 +1,39 @@
+dff_pre_layout_Simulations
+.include TSMC_180nm.txt
+.include sub_circuits.sub
+
+.param LAMBDA=0.09u
+.param SUPPLY=1.8
+.param width=1.8u
+
+.global vdd gnd
+
+VDD vdd gnd 'SUPPLY'
+
+Vclk clk gnd pulse (1.8 0 0 0 0 5n 10n)
+
+* At t_s=1.1ns, max t_pcq
+* Vd d gnd pulse (0 1.8 4.89n 0 0 10n 20n) 
+
+* For min t_pcq
+Vd d gnd pulse (0 1.8 3n 0 0 10n 20n) 
+
+* dff code in sub_circuits.sub
+Xdff1 q d clk vdd gnd dff
+
+.tran 0.01n 20n
+
+* Measuring tpcq
+.measure tran tpcq_r trig v(clk) val='SUPPLY/2' rise=1 targ v(q) val='SUPPLY/2' rise=1
+.measure tran tpcq_f trig v(clk) val='SUPPLY/2' rise=2 targ v(q) val='SUPPLY/2' fall=1
+.measure tran tpcq param='(tpcq_r+tpcq_f)/2' goal=1
+
+.control
+set hcopypscolor = 1 
+set color0=white 
+set color1=black 
+
+run
+set curplottitle=Snehil_Sanjog-2023102051-q3-dff
+plot v(q) v(d)+2 v(clk)+4
+.endc

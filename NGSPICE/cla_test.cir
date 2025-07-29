@@ -1,0 +1,74 @@
+CLA_Adder_pre_layout_Simulations
+.include TSMC_180nm.txt
+.include sub_circuits.sub
+
+.param LAMBDA=0.09u
+.param SUPPLY=1.8
+.param width=1.8u
+
+.global vdd gnd
+
+VDD vdd gnd 'SUPPLY'
+VC0 c0 gnd 0
+
+VA3 a3 gnd pulse(0 1.8 5n 0 0 5n 10n)
+VA2 a2 gnd 0
+VA1 a1 gnd 0
+VA0 a0 gnd pulse(0 1.8 5n 0 0 5n 10n)
+
+VB3 b3 gnd pulse(0 1.8 5n 0 0 5n 10n)
+VB2 b2 gnd pulse(0 1.8 5n 0 0 5n 10n)
+VB1 b1 gnd 0
+VB0 b0 gnd pulse(0 1.8 5n 0 0 5n 10n)
+
+
+* All Propagate and Generate
+Xp_g_ckt0 p0 g0 a0 b0 vdd gnd p_g_ckt
+Xp_g_ckt1 p1 g1 a1 b1 vdd gnd p_g_ckt
+Xp_g_ckt2 p2 g2 a2 b2 vdd gnd p_g_ckt
+Xp_g_ckt3 p3 g3 a3 b3 vdd gnd p_g_ckt
+
+* CLA block
+Xand1 w1 p0 c0 vdd gnd and2
+Xor1 c1 w1 g0 vdd gnd or2
+
+Xand21 w21 p1 g0 vdd gnd and2
+Xand22 w22 p1 p0 c0 vdd gnd and3
+Xor2 c2  g1 w21 w22 vdd gnd or3
+
+Xand31 w31 p2 g1 vdd gnd and2
+Xand32 w32 p2 p1 g0 vdd gnd and3
+Xand33 w33 p2 p1 p0 c0 vdd gnd and4
+Xor3 c3 g2 w31 w32 w33 vdd gnd or4
+
+Xand41 w41 p3 g2 vdd gnd and2
+Xand42 w42 p3 p2 g1 vdd gnd and3
+Xand43 w43 p3 p2 p1 g0 vdd gnd and4
+Xand44 w44 p3 p2 p1 p0 c0 vdd gnd and5
+Xor4 c4 g3 w41 w42 w43 w44 vdd gnd or5
+
+* Sum Block
+Xxor0 s0 c0 p0 vdd gnd xor
+Xxor1 s1 c1 p1 vdd gnd xor
+Xxor2 s2 c2 p2 vdd gnd xor
+Xxor3 s3 c3 p3 vdd gnd xor
+
+.tran 0.01n 10n
+
+* To measure delay
+* .measure tran tpd_s0 trig v(a0) val='SUPPLY/2' rise=1 targ v(s0) val='SUPPLY/2' rise=1
+* .measure tran tpd_s1 trig v(a0) val='SUPPLY/2' rise=1 targ v(s1) val='SUPPLY/2' rise=1
+* .measure tran tpd_s2 trig v(a0) val='SUPPLY/2' rise=1 targ v(s2) val='SUPPLY/2' rise=1
+* .measure tran tpd_s3 trig v(a0) val='SUPPLY/2' rise=1 targ v(s3) val='SUPPLY/2' rise=1
+* .measure tran tpd_carry trig v(a0) val='SUPPLY/2' rise=1 targ v(c4) val='SUPPLY/2' rise=1
+
+.control
+set hcopypscolor = 1 
+set color0=white
+set color1=black 
+
+run
+set curplottitle=Snehil_Sanjog-2023102051-q3-cla_adder
+plot v(s0) v(s1)+2 v(s2)+4 v(s3)+6 v(c4)+8
+
+.endc
